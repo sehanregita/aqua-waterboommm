@@ -1,0 +1,265 @@
+
+<?php
+$nama = "";
+$jenis = "Reguler";
+$jumlah = 1;
+$total = 0;
+$pesanan = false;
+$error = "";
+
+$hargaTiket = [
+    "Reguler" => 30000,
+    "Premium" => 50000,
+    "VIP" => 75000
+];
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $nama = trim($_POST["nama"] ?? "");
+    $jenis = $_POST["jenis"] ?? "Reguler";
+    $jumlah = filter_var(
+        $_POST["jumlah"] ?? 1,
+        FILTER_VALIDATE_INT
+    );
+
+    if (
+        $nama === "" ||
+        !isset($hargaTiket[$jenis]) ||
+        $jumlah === false ||
+        $jumlah < 1 ||
+        $jumlah > 20
+    ) {
+        $error = "Mohon isi data dengan benar!";
+    } else {
+        $total = $hargaTiket[$jenis] * $jumlah;
+        $pesanan = true;
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aqua Waterboom - Pesan Tiket</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #eef7ff;
+    color: #17324d;
+}
+
+header {
+    background: linear-gradient(135deg, #0879c9, #00c6d7);
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+}
+
+header .logo {
+    font-size: 48px;
+}
+
+header h1 {
+    margin: 10px 0;
+    font-size: 30px;
+}
+
+header p {
+    margin-bottom: 0;
+}
+
+.container {
+    width: 92%;
+    max-width: 520px;
+    margin: 25px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 18px;
+    box-shadow: 0 8px 25px #17324d18;
+}
+
+h2 {
+    color: #0879c9;
+    margin-top: 0;
+}
+
+label {
+    display: block;
+    margin: 17px 0 8px;
+    font-weight: bold;
+}
+
+input, select {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #cbddeb;
+    border-radius: 9px;
+    font-size: 15px;
+    background: white;
+}
+
+.tiket {
+    border: 1px solid #d8e9f7;
+    border-radius: 10px;
+    padding: 13px;
+    margin-top: 10px;
+}
+
+.tiket strong {
+    color: #0879c9;
+}
+
+button {
+    width: 100%;
+    margin-top: 22px;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #0879c9;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #075a98;
+}
+
+.hasil {
+    margin-top: 22px;
+    padding: 18px;
+    background: #e5f8ed;
+    border-radius: 12px;
+    overflow-wrap: anywhere;
+}
+
+.hasil h3 {
+    color: #16834a;
+    margin-top: 0;
+}
+
+.total {
+    color: #0879c9;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.error {
+    margin-top: 15px;
+    padding: 12px;
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 8px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #61758a;
+    font-size: 13px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">🌊</div>
+    <h1>AQUA WATERBOOM</h1>
+    <p>Serunya bermain air bersama keluarga!</p>
+</header>
+
+<div class="container">
+    <h2>🎟️ Pesan Tiket</h2>
+    <p>Pilih tiket dan isi data pemesanan kamu.</p>
+
+    <div class="tiket">
+        <strong>Reguler</strong>
+        <p>Rp30.000 / orang</p>
+    </div>
+
+    <div class="tiket">
+        <strong>Premium</strong>
+        <p>Rp50.000 / orang</p>
+    </div>
+
+    <div class="tiket">
+        <strong>VIP</strong>
+        <p>Rp75.000 / orang</p>
+    </div>
+
+    <form method="POST" action="">
+        <label for="nama">Nama Pembeli</label>
+        <input
+            type="text"
+            id="nama"
+            name="nama"
+            maxlength="100"
+            value="<?= htmlspecialchars($nama, ENT_QUOTES, 'UTF-8') ?>"
+            placeholder="Masukkan nama kamu"
+            required
+        >
+
+        <label for="jenis">Jenis Tiket</label>
+        <select id="jenis" name="jenis" required>
+            <?php foreach ($hargaTiket as $tipe => $harga): ?>
+                <option
+                    value="<?= $tipe ?>"
+                    <?= $jenis === $tipe ? "selected" : "" ?>
+                >
+                    <?= $tipe ?> - Rp<?= number_format($harga, 0, ',', '.') ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
+        <label for="jumlah">Jumlah Tiket</label>
+        <input
+            type="number"
+            id="jumlah"
+            name="jumlah"
+            min="1"
+            max="20"
+            value="<?= htmlspecialchars((string)$jumlah, ENT_QUOTES, 'UTF-8') ?>"
+            required
+        >
+
+        <button type="submit">Pesan Sekarang</button>
+    </form>
+
+    <?php if ($error !== ""): ?>
+        <div class="error">
+            <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($pesanan): ?>
+        <div class="hasil">
+            <h3>✅ Pesanan Berhasil!</h3>
+            <p>Nama: <?= htmlspecialchars($nama, ENT_QUOTES, 'UTF-8') ?></p>
+            <p>Jenis tiket: <?= $jenis ?></p>
+            <p>Jumlah tiket: <?= $jumlah ?></p>
+            <p>Harga satuan: Rp<?= number_format($hargaTiket[$jenis], 0, ',', '.') ?></p>
+            <hr>
+            <p>Total pembayaran:</p>
+            <div class="total">
+                Rp<?= number_format($total, 0, ',', '.') ?>
+            </div>
+            <p>Terima kasih telah memesan tiket Aqua Waterboom!</p>
+        </div>
+    <?php endif; ?>
+</div>
+
+<footer>
+    &copy; 2026 Aqua Waterboom | Aplikasi Pemesanan Tiket
+</footer>
+
+</body>
+</html>
